@@ -1,41 +1,56 @@
 codeunit 50134 "Stock Monitor"
 {
+
     procedure CheckLowStock()
     var
         Item: Record Item;
         LowStockThreshold: Integer;
-        ItemNos: array[4] of Code[20];
+        ItemNos: array[5] of Code[20];
         i: Integer;
-        Buffer: Record "LowStockBuffer"; // <-- This is the fix
+        Buffer: Record "LowStockBuffer";
         HasLowStock: Boolean;
     begin
+        // Optional debug message
+        // Message('CheckLowStock triggered');
+
         LowStockThreshold := 10;
         HasLowStock := false;
 
-        Buffer.DeleteAll(); // Still fine here since it's now a temp buffer
+        // Optional: clear old records (uncomment for testing)
+        // Buffer.DeleteAll();
 
         ItemNos[1] := '1000';
         ItemNos[2] := '1100';
         ItemNos[3] := '1700';
-        ItemNos[4] := '1001'; // This one has 0 stock – good test
+        ItemNos[4] := '1001';
+        ItemNos[5] := 'LS-150';
 
-        for i := 1 to 4 do begin
+        for i := 1 to 5 do begin
             if Item.Get(ItemNos[i]) then begin
+                Item.CalcFields(Inventory);
+
                 if Item.Inventory < LowStockThreshold then begin
-                    Buffer.Init();
-                    Buffer."Item No." := Item."No.";
-                    Buffer.Description := Item.Description;
-                    Buffer.Inventory := Item.Inventory;
-                    Buffer.Insert();
-                    HasLowStock := true;
+                    // Optional debug message
+                    // Message('Item %1 has low stock (%2)', Item."No.", Item.Inventory);
+
+                    if Buffer.Get(Item."No.") then begin
+                        Buffer.Description := Item.Description;
+                        Buffer.Inventory := Item.Inventory;
+                        Buffer.Modify();
+                    end else begin
+                        Buffer.Init();
+                        Buffer."Item No." := Item."No.";
+                        Buffer.Description := Item.Description;
+                        Buffer.Inventory := Item.Inventory;
+                        Buffer.Insert();
+                    end;
                 end;
             end;
         end;
-
-        if HasLowStock then begin
-            Message('One or more items are low in stock.');
-            Report.RunModal(50137, true, false); // Show the report
-        end;
     end;
 
+    trigger OnRun()
+    begin
+        CheckLowStock(); // This allows it to be triggered by the Job Queue
+    end;
 }

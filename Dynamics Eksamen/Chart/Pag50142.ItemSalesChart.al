@@ -55,6 +55,17 @@ page 50142 "Item Sales Chart"
     {
         area(processing)
         {
+            action(RunCheckLowStock)
+            {
+                Caption = 'Run Check Low Stock';
+                ApplicationArea = All;
+                trigger OnAction()
+                var
+                    SM: Codeunit "Stock Monitor";
+                begin
+                    SM.CheckLowStock();
+                end;
+            }
             action(ShowChart)
             {
                 ApplicationArea = All;
