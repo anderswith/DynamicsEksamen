@@ -1,5 +1,6 @@
 page 50141 SalesOrderReceiverApi
 {
+    //bruges ikke
     APIGroup = 'sales';
     APIPublisher = 'AndersW';
     APIVersion = 'v1.0';
