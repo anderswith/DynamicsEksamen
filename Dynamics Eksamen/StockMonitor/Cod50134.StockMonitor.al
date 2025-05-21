@@ -27,7 +27,7 @@ codeunit 50134 "Stock Monitor"
 
         for i := 1 to 5 do begin
             if Item.Get(ItemNos[i]) then begin
-                Item.CalcFields(Inventory);
+                Item.CalcFields(Inventory); //without this item.inventory = 0
 
                 if Item.Inventory < LowStockThreshold then begin
                     // Optional debug message
